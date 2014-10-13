@@ -1,0 +1,12 @@
+{% if itemlist %}
+	<ul>
+	{% for item in itemlist %}
+		<li><a href="#">{{item.itemName}}</a>
+		|{{item.itemTime}}|{{item.itemInterval}}|{{item.itemTime}}
+		</li>
+		
+	{% endfor %}
+	</ul>
+{% else %}
+	<p>没有</p>
+{% endif %}

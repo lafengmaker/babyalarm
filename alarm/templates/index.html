@@ -1,0 +1,9 @@
+{% if babylist %}
+	<ul>
+	{% for baby in babylist %}
+		<li><a href="babyitem/{{baby.id}}">{{baby.name}}</a></li>
+	{% endfor %}
+	</ul>
+{% else %}
+	<p>还没有添加baby</p>
+{% endif %}
