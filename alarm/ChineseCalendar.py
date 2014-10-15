@@ -165,6 +165,8 @@ def get_ludar_date(tm):
     year, month, day = START_YEAR, 1, 1
     #计算年
     tmp = lunar_year_days(year)
+    print 'tmppp %i' %tmp
+    print 'span_days %i' %span_days
     while span_days >= tmp:
         span_days -= tmp
         year += 1
@@ -172,24 +174,29 @@ def get_ludar_date(tm):
 
     #计算月
     (foo, tmp) = lunar_month_days(year, month)
+    print "tmp  %i" %tmp
+    print "span_days  %i" %span_days
     while span_days >= tmp:
         span_days -= tmp
         if (month == get_leap_month(year)):
             (tmp, foo) = lunar_month_days(year, month)
-            if (span_days < tmp):
-                return (0, 0, 0)
-            span_days -= tmp
+            #if (span_days < tmp):
+            #    return (0, 0, 0)
+            if span_days > tmp :
+                span_days -= tmp
         month += 1
         (foo, tmp) = lunar_month_days(year, month)
 
     #计算日
+    print span_days;
     day += span_days
     return (year, month, day)
 
 #功能简单，只打印当月的
 #this_month()
+def getChinesestr(dt):
+    (y, m, d) = get_ludar_date(dt);
+    return "%s%s%s"%(y_lunar(y),m_lunar(m),d_lunar(d))
 
-(x, y, z) = get_ludar_date(datetime.now());
-print (x, y, z)
 
 
