@@ -24,11 +24,6 @@ class DateIem():
         self.items="";
         
 def loandweekday(dt_s,num):
-    num=num*7;
-    if num<0:
-        num=-num;
-        deltaw=datetime.timedelta(days=num);
-        dt_s=dt_s-deltaw;
     li=[];
     for i in range(0,num):
         li.append(DateIem(dt_s));
@@ -36,7 +31,6 @@ def loandweekday(dt_s,num):
         dt_s=dt_s+deltaw;
     return li;
 def comparedate(d1,d2,type):
-    print d2;
     if  type == 1 :
         return True;
     (y1,m1,da1,w1)=(d1.year,d1.month,d1.day,int(d1.strftime('%w')));
@@ -50,13 +44,20 @@ def comparedate(d1,d2,type):
     else:#once
         return y1==y2 and da1==da2 and m1 == m2;
         
-def getMonthdayList():
-    dt=datetime.datetime.now();
+def getWeeksratDay(dt):
     w=int(dt.strftime('%w'))-1;
     deltaw=datetime.timedelta(days=w);
     dt_s=dt-deltaw;
-    li=loandweekday(dt_s,-1);
-    li=li+loandweekday(dt_s,4);
+    return dt_s;
+def getCalenderStart(dt):
+    dt_s=getWeeksratDay(dt);
+    deltaw=datetime.timedelta(days=7);
+    dt_s=dt_s-deltaw;
+    return dt_s;
+def getMonthdayList(dt):
+    dt_s=getWeeksratDay(dt);
+    dt_s=getCalenderStart(dt_s);
+    li=loandweekday(dt_s,35);
     return li;
     
 def getYearCircle(d):
@@ -78,31 +79,41 @@ def date2utcdateTime(date):
      (y,m,d)=(date.year,date.month,date.day)
      from django.utils.timezone import utc
      d1 = datetime.datetime.utcnow().replace(tzinfo=utc)
-     d1.replace(year=y,month=m,day=d);
-     return d1;
+     return d1.replace(year=y,month=m,day=d);
 def getYearsVirtual(d):
     y1=getLYear(datetime.datetime.now());
     y2=getLYear(date2dateTime(d));
     return (y1-y2)+1;
 
 def index(request):
+    now=datetime.datetime.now();
     if 'baby_id' in request.COOKIES:
         baby_id = request.COOKIES['baby_id']
-        return redirect('babyitemlist',baby_id=baby_id);
+        if request.GET :
+            dt=request.GET['dt'];            
+            if dt:
+                t= time.strptime(dt, "%Y-%m-%d")
+                now=datetime.datetime(*t[:3]);
+        return redirect('babyitemlist',baby_id=baby_id,year=now.year,month=now.month,day=now.day);
     babylist=Baby.objects.all().order_by("id")
-    return render(request,'index.html',{"babylist":babylist});
+    return render(request,'index.html',{"babylist":babylist,"now":now});
 
-def babyitemdetail(request,baby_id):
+def babyitemdetail(request,baby_id,year,month,day):
+    if not baby_id :
+        return redirect('index');
+    try:
+        currdat=datetime.datetime(int(year),int(month),int(day));
+    except:
+        render(request,'error.html',{"msg":"日期格式不正确"});
     baby=get_object_or_404(Baby, pk=baby_id)
-    from django.utils.timezone import utc
-    now = datetime.datetime.utcnow().replace(tzinfo=utc)
-    sevendaylater=now+datetime.timedelta(days=7);
-    dnow = datetime.date.today()
-    babyyd=(dnow-baby.birthday);
-    babyyear=getYearCircle(baby.birthday);
-    babyyearv=getYearsVirtual(baby.birthday);
-    itemlist=AlarmItem.objects.filter(baby_id=baby_id,itemTime__gt=datetime.datetime.now(),itemTime__lt=sevendaylater);
-    dayli=getMonthdayList();
+    now = date2utcdateTime(currdat);
+    rnow=datetime.datetime.now();
+    dt_start=getCalenderStart(currdat);
+    dt_end=dt_start+datetime.timedelta(days=35);
+    itemlist=AlarmItem.objects.filter(baby_id=baby_id,itemTime__gt=dt_start,itemTime__lt=dt_end);
+    dayli=getMonthdayList(currdat);
+    start_d=getWeeksratDay(currdat);
+    
     babytime=date2utcdateTime(baby.birthday);
     for dayi in dayli:
         if comparedate(dayi.dt,baby.birthday,4):
@@ -110,10 +121,28 @@ def babyitemdetail(request,baby_id):
             #dayi.isli.append(itemshow(babytime,"宝宝过生日"));
         for item in itemlist:
             if comparedate(dayi.dt,item.itemTime,int(item.itemInterval)):
-                dayi.items=dayi.items+item.itemName;
+                dayi.items=dayi.items+item.itemName.encode('utf-8');
                 #dayi.isli.append(itemshow( item.itemTime,item.itemName));
-    response = render(request,'itemlist.html',{"now":now,"dinfo":{"g":datetime.date.strftime(now,"%Y年%m月%d日"),"n":ChineseCalendar.getChinesestr(datetime.datetime.now())},  "dayli":dayli,"babydays":(babyyd.days+1),"babyyearsv":babyyearv,"babyyears":babyyear,"birthday":datetime.date.strftime(baby.birthday,"%Y-%m-%d"),"baby":baby});
+    #response = render(request,'itemlist.html',{"now":now,"dinfo":{"g":datetime.date.strftime(now,"%Y年%m月%d日"),"gi":datetime.date.strftime(now,"%Y-%m-%d"),"n":ChineseCalendar.getChinesestr(datetime.datetime.now())},  "dayli":dayli,"babydays":(babyyd.days+1),"babyyearsv":babyyearv,"babyyears":babyyear,"birthday":datetime.date.strftime(baby.birthday,"%Y-%m-%d"),"baby":baby});
+    response = render(request,'itemlist.html',{"now":now,
+                                               "dinfo":{"g":datetime.date.strftime(now,"%Y年%m月%d日"),"gi":datetime.date.strftime(now,"%Y-%m-%d"),"n":ChineseCalendar.getChinesestr(currdat)},
+                                                "dayli":dayli,
+                                                "isToday":comparedate(rnow,currdat,5),
+                                                "baby":baby});
     response.set_cookie('baby_id', baby_id);
     return response ;
+
+def babyInfo(request,baby_id):
+    if not baby_id :
+        return redirect('index');
+    baby=get_object_or_404(Baby, pk=baby_id)
+    dnow = datetime.date.today()
+    babyyd=(dnow-baby.birthday);
+    babyyear=getYearCircle(baby.birthday);
+    babyyearv=getYearsVirtual(baby.birthday);
+    return render(request,'babyinfo.html',{"baby":baby,"babyyd":babyyd,"babyyear":babyyear,"babyyearv":babyyearv});
+    
+    
+    
         
 

@@ -37,6 +37,10 @@ body {
   width: 100%;
   height: 100%; /* For at least Firefox */
   min-height: 100%;
+  background-image: url("../img/baby/20141019204655.jpg");
+  background-repeat: no-repeat;
+  background-position: left;
+  background-size:350px 
 }
 .site-wrapper-inner {
   display: table-cell;

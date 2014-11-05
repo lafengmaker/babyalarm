@@ -165,8 +165,6 @@ def get_ludar_date(tm):
     year, month, day = START_YEAR, 1, 1
     #计算年
     tmp = lunar_year_days(year)
-    print 'tmppp %i' %tmp
-    print 'span_days %i' %span_days
     while span_days >= tmp:
         span_days -= tmp
         year += 1
@@ -174,8 +172,6 @@ def get_ludar_date(tm):
 
     #计算月
     (foo, tmp) = lunar_month_days(year, month)
-    print "tmp  %i" %tmp
-    print "span_days  %i" %span_days
     while span_days >= tmp:
         span_days -= tmp
         if (month == get_leap_month(year)):
@@ -188,7 +184,6 @@ def get_ludar_date(tm):
         (foo, tmp) = lunar_month_days(year, month)
 
     #计算日
-    print span_days;
     day += span_days
     return (year, month, day)
 

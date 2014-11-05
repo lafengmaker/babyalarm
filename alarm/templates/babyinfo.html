@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}宝宝信息{% endblock %}
+{% block addoncss %}
+ <link href="{% static 'css/babyinfo.css' %}" rel="stylesheet">
+{% endblock %}
+<!DOCTYPE html>
+          {% block content %}
+          <div class="inner cover">
+	      	<h1>{{baby.name}}出生了{{babyyd.days}}天，已经{{babyyear}}周岁, {{babyyearv}}虚岁</h1>
+          </div>
+          {% endblock %}
+{% block addonjs %}
+$(function() {
+	$('#selectdt').datetimepicker(
+			{pickTime: false}
+	);
+});
+
+function returnToday(){
+	location.href="/";
+}
+function selectDay(){
+	var dt = $('#selectdt').val();
+	location.href="/?dt="+dt;
+}
+{% endblock %}
+

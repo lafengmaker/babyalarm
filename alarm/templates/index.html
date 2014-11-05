@@ -1,7 +1,7 @@
 {% if babylist %}
 	<ul>
 	{% for baby in babylist %}
-		<li><a href="babyitem/{{baby.id}}">{{baby.name}}</a></li>
+		<li><a href="babyitem/{{baby.id}}/{{now.year}}/{{now.month}}/{{now.day}}">{{baby.name}}</a></li>
 	{% endfor %}
 	</ul>
 {% else %}

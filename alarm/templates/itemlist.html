@@ -1,51 +1,19 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 {% load staticfiles %}
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    
-    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
-
-    <title>宝宝相关提醒</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="{% static 'css/itemlist.css' %}" rel="stylesheet">
-
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
-
-  <body>
-    <div class="site-wrapper">
-
-      <div class="site-wrapper-inner">
-
-        <div class="cover-container">
-
-          <div class="masthead clearfix">
-            <div class="inner">
-              <h3 class="masthead-brand"></h3>
-              <ul class="nav masthead-nav">
-                <li ><a href="#">备忘录</a></li>
-              </ul>
-            </div>
-          </div>
+{% block title %}宝宝提醒日期列表{% endblock %}
+{% block addoncss %}
+ <link href="{% static 'css/itemlist.css' %}" rel="stylesheet">
+{% endblock %}
+<!DOCTYPE html>
+          {% block content %}
           <div class="inner cover">
           <h1>{{dinfo.g}}{{dinfo.n}}</h1>
+          <div class="row" style="margin: 25px auto;">
+		        <div class="col-md-8 noborder"><input type="text" class="form-control" id="selectdt" onchange="selectDay()" data-date-format="YYYY-MM-DD" name="selectdt" style="background-color: #4DDDDD;border: 0; color: black; font-weight: bold;" value="{{dinfo.gi}}" /></div>
+				{% if isToday != True %}
+				<div class="btn btn-lg btn-primary" onclick="returnToday()">返回今天</div>
+				{% endif %}
+			</div>
           	<div class="row">
 		        <div class="col-md-2">一</div>
 		        <div class="col-md-2">二</div>
@@ -63,7 +31,7 @@
 	      			<div class="col-md-2 {% if d.gm != now.month %} outmonth {% endif %} {% if d.w = 0 or d.w = 6 %} weekend {% endif %} {% if d.gy = now.year and d.gm = now.month and d.gd = now.day  %}
 	      			today{% endif %} {% if  d.items %}infoimg {% endif %} "
 	      			data-toggle="popover" data-placement="left" data-trigger="hover"
-	      			data-content="{{d.items}}"
+	      			data-content="{{d.items}}"   {% if  d.items %}title=" 备忘项目 " {% endif %} 
 	      			
 	      			>
 	      			{{d.gd}}<br/>{{d.nd}} 
@@ -76,26 +44,22 @@
 	      	{% else %}
 	      	<div class="row date">日期读取出错</div>
 	      	{% endif %}
+	      	
           </div>
-		
-          <div class="mastfoot">
-            <div class="inner">
-              <p>{{baby.name}} 相关的备忘列表</p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/docs.min.js' %}"></script>
-<script type="text/javascript">
+          {% endblock %}
+{% block addonjs %}
 $(function() {
-	//$('#datetimepicker').datetimepicker();
+	$('#selectdt').datetimepicker(
+			{pickTime: false}
+	);
 });
-</script>
-</body>
-</html>
+
+function returnToday(){
+	location.href="/";
+}
+function selectDay(){
+	var dt = $('#selectdt').val();
+	location.href="/?dt="+dt;
+}
+{% endblock %}
 
